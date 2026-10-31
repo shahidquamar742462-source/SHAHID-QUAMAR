@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#4f46e5">
+<title>Flat Khata</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  
+  :root {
+    --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --muted: #64748b;
+    --border: #e2e8f0; --input-bg: #f8fafc;
+    --green: #16a34a; --green-l: #f0fdf4;
+    --red: #dc2626; --red-l: #fef2f2;
+    --indigo: #4f46e5; --indigo-l: #eef2ff;
+    --shadow: rgba(15,23,42,.05);
+  }
+  body.dark {
+    --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8;
+    --border: #334155; --input-bg: #0f172a;
+    --green: #22c55e; --green-l: #064e3b;
+    --red: #ef4444; --red-l: #7f1d1d;
+    --indigo: #6366f1; --indigo-l: #312e81;
+    --shadow: rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+    background:var(--bg);color:var(--text);font-size:15px;line-height:1.45;
+    padding-bottom:40px; transition: background .3s, color .3s;
+  }
+  .app{max-width:520px;margin:0 auto;padding:14px 12px 0}
+
+  /* HEADER */
+  header{margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-end}
+  .month-wrap{flex:1;margin-right:10px}
+  .mlabel{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:6px;padding-left:2px}
+  #monthPicker{
+    width:100%;padding:13px 14px;border:1.5px solid var(--border);background:var(--card);
+    border-radius:14px;font-size:16px;font-family:inherit;font-weight:700;color:var(--text);outline:none;
+  }
+  .theme-btn{
+    background:var(--card);border:1.5px solid var(--border);color:var(--text);
+    width:48px;height:48px;border-radius:14px;font-size:20px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center; transition:.15s;
+  }
+
+  /* TABS */
+  .tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+  .tab{
+    border:2px solid transparent;background:var(--card);border-radius:16px;
+    padding:12px 8px;text-align:left;cursor:pointer;font-family:inherit;
+    transition:.18s;box-shadow:0 1px 3px var(--shadow);
+  }
+  .tab .tl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  .tab .tv{font-size:17px;font-weight:800;letter-spacing:-.5px;margin-top:3px}
+  .tab.rev .tv{color:var(--green)}
+  .tab.exp .tv{color:var(--red)}
+  .tab.bal .tv{color:var(--indigo)}
+  .tab.rev.active{border-color:var(--green);background:var(--green-l)}
+  .tab.exp.active{border-color:var(--red);background:var(--red-l)}
+  .tab.bal.active{border-color:var(--indigo);background:var(--indigo-l)}
+  .tab:active{transform:scale(.985)}
+
+  /* STATS ROW */
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .stat-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 10px 6px; text-align: center; box-shadow: 0 1px 2px var(--shadow);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .stat-box .stl { font-size: 9px; font-weight: 800; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; line-height: 1.2; margin-bottom: 4px; }
+  .stat-box .stv { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
+  .stat-box .stv.green { color: var(--green); }
+  .stat-box .stv.red { color: var(--red); }
+  .stat-box .stv.indigo { color: var(--indigo); }
+
+  .panel{display:none}
+  .panel.active{display:block;animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+  /* LISTS */
+  .rev-row{display:flex;gap:8px;margin-bottom:9px;align-items:center}
+  .rev-row input{ border:1.5px solid var(--border);background:var(--card);border-radius:13px; padding:13px 12px;font-size:15px;font-family:inherit;color:var(--text);outline:none; }
+  .rev-row input:focus{border-color:var(--green)}
+  .in-name{flex:1;min-width:0;font-weight:600}
+  .in-amt{width:112px;text-align:right;font-weight:800}
+
+  .exp-form{ background:var(--card);border:1px solid var(--border);border-radius:16px; padding:12px;margin-bottom:14px;box-shadow:0 1px 3px var(--shadow); }
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+  .frow:last-child{margin-bottom:0}
+  .frow.two{grid-template-columns:1fr 58px}
+  .frow input{ width:100%;padding:12px;border:1.5px solid var(--border);background:var(--input-bg); border-radius:12px;font-size:15px;font-family:inherit;color:var(--text);outline:none; }
+  .frow input:focus{border-color:var(--red);background:var(--card)}
+  .addbtn{ border:none;background:var(--red);color:#fff;border-radius:12px; font-size:24px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center; }
+
+  .exp-item{ display:flex;align-items:center;gap:10px;background:var(--card); border:1px solid var(--border);border-radius:14px;padding:11px 12px; margin-bottom:8px;box-shadow:0 1px 2px var(--shadow); }
+  .exp-item .info{flex:1;min-width:0}
+  .exp-item .it{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .exp-item .id{font-size:12px;color:var(--muted);margin-top:1px}
+  .exp-item .amt{font-size:15px;font-weight:800;color:var(--red);white-space:nowrap}
+  .exp-item .del{ border:none;background:var(--red-l);color:var(--red);width:27px;height:27px; border-radius:9px;font-size:13px;font-weight:800;cursor:pointer; }
+
+  .search-box{margin-bottom:12px;position:relative}
+  .search-box input{ width:100%;padding:12px 14px 12px 38px;border:1.5px solid var(--border); background:var(--card);border-radius:12px;font-size:14px;color:var(--text);outline:none; }
+  .search-box::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.5}
+
+  .action-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+  .abtn{padding:12px 6px;border:none;border-radius:12px;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;}
+  .abtn.pdf{background:var(--card);border:1.5px solid var(--border);color:var(--text)}
+  .abtn.wa{background:#25D366;color:#fff}
+  .abtn.csv{background:var(--card);border:1.5px solid var(--border);color:var(--text)}
+
+  .carry-forward-box { display: flex; justify-content: space-between; align-items: center; background: var(--input-bg); border: 1.5px dashed var(--border); border-radius: 12px; padding: 12px 14px; margin-top: 12px; margin-bottom: 8px; }
+  .carry-forward-box span { font-size: 13px; font-weight: 700; color: var(--muted); }
+  .carry-forward-box b { font-size: 16px; font-weight: 800; }
+
+  .sumline{ display:flex;justify-content:space-between;align-items:center; padding:14px 4px 6px;margin-top:8px;border-top:1.5px dashed var(--border); font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase; }
+  .sumline b{font-size:19px;color:var(--green)}
+  .sumline.red b{color:var(--red)}
+
+  .bal-box{ background:var(--card);border:1px solid var(--border);border-radius:20px; padding:22px 18px;box-shadow:0 2px 8px var(--shadow);text-align:center; }
+  .bal-lbl{font-size:11.5px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .bal-val{font-size:38px;font-weight:800;color:var(--indigo);margin-bottom:6px;cursor:pointer;}
+  .bal-val.neg{color:var(--red)}
+  .bal-rows{text-align:left;border-top:1.5px dashed var(--border);padding-top:14px}
+  .bal-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:14px;font-weight:600;color:var(--muted)}
+  .bal-row span:first-child{color:var(--text)}
+  .bal-row b{font-size:15px;color:var(--text)}
+  .bal-row .g{color:var(--green)}
+  .bal-row .r{color:var(--red)}
+
+  .settle-up-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-top: 14px; box-shadow: 0 2px 8px var(--shadow); }
+  .settle-up-box h3 { font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; text-align: center; }
+  .settle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--border); font-size: 14px; font-weight: 600; }
+  .settle-row:last-child { border-bottom: none; }
+  .settle-row span { color: var(--text); }
+  .settle-row b.pos { color: var(--green); }
+  .settle-row b.neg { color: var(--red); }
+  .settle-row b.neutral { color: var(--muted); font-size: 12px; }
+
+  .chart-wrap{display:none;margin-top:14px}
+  .chart-wrap.show{display:block;animation:slideDown .28s ease}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px 16px;}
+  .chart-card h3{font-size:11.5px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:16px;text-align:center}
+  .donut-box{width:200px;height:200px;margin:0 auto 18px;position:relative}
+  .legend{display:flex;flex-direction:column;}
+  .lg-row{display:flex;align-items:center;gap:9px;font-size:13px;padding:9px 2px;border-bottom:1px dashed var(--border)}
+  .lg-row:last-child{border-bottom:none}
+  .lg-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+  .lg-name{flex:1;font-weight:600;color:var(--text)}
+  .lg-pct{font-weight:700;color:var(--muted);font-size:11.5px;background:var(--input-bg);padding:2px 7px;border-radius:6px}
+  .lg-amt{font-weight:800;color:var(--red);min-width:62px;text-align:right}
+
+  .backup-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-top:14px;}
+  .backup-box h3{font-size:13px;margin-bottom:12px;color:var(--text)}
+  .backup-box p{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .backup-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .b-btn{padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;border:1px solid var(--border);background:var(--input-bg);color:var(--text);}
+  
+  .empty{text-align:center;color:var(--muted);font-size:13.5px;padding:26px 0}
+
+  #print-section { display: none; }
+  @media print {
+    body * { visibility: hidden; }
+    #print-section, #print-section * { visibility: visible; }
+    #print-section { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; color: #000; }
+    .p-head { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+    .p-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .p-table th, .p-table td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+    .p-table th { background: #f5f5f5; }
+    .p-table td:last-child, .p-table th:last-child { text-align: right; }
+    .p-total { text-align: right; font-size: 18px; font-weight: bold; border-top: 2px solid #000; padding-top: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="month-wrap">
+      <label class="mlabel" for="monthPicker">Month &amp; Year</label>
+      <input type="month" id="monthPicker">
+    </div>
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </header>
+
+  <!-- ROW 1: MAIN TABS -->
+  <div class="tabs">
+    <button class="tab rev active" data-tab="revenue">
+      <div class="tl">Revenue</div>
+      <div class="tv" id="revTotal">₹0</div>
+    </button>
+    <button class="tab exp" data-tab="expense">
+      <div class="tl">Expenses</div>
+      <div class="tv" id="expTotal">₹0</div>
+    </button>
+    <button class="tab bal" data-tab="balance">
+      <div class="tl">Balance</div>
+      <div class="tv" id="balTotal">₹0</div>
+    </button>
+  </div>
+
+  <!-- ROW 2: 4 AVERAGE COLUMNS -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stl">Total Avg</div>
+      <div class="stv green" id="topAvgExp">₹0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stl">Current Avg</div>
+      <div class="stv red" id="topCurrAvg">₹0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stl">Surplus / Deficit</div>
+      <div class="stv green" id="topSurplusAvg">₹0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stl">Remaining Avg (Daily)</div>
+      <div class="stv indigo" id="topRemainingAvg">₹0</div>
+    </div>
+  </div>
+
+  <!-- ===== REVENUE PANEL ===== -->
+  <section class="panel active" id="panel-revenue">
+    <div id="revList"></div>
+    
+    <div class="carry-forward-box">
+      <span>Pichle mahine se bacha hua (Carry Forward)</span>
+      <b id="carryForwardVal">₹0</b>
+    </div>
+
+    <div class="sumline"><span>Total Revenue (Available)</span><b id="revSum">₹0</b></div>
+  </section>
+
+  <!-- ===== EXPENSE PANEL ===== -->
+  <section class="panel" id="panel-expense">
+    <form class="exp-form" id="expForm" autocomplete="off">
+      <div class="frow">
+        <input type="date" name="date" required>
+        <input type="text" name="item" placeholder="Item" required>
+      </div>
+      <div class="frow two">
+        <input type="number" name="amount" inputmode="decimal" min="1" step="1" placeholder="₹ Amount" required>
+        <button type="submit" class="addbtn">+</button>
+      </div>
+    </form>
+
+    <div class="search-box">
+      <input type="text" id="searchExp" placeholder="Search kharcha...">
+    </div>
+
+    <div class="action-btns">
+      <button class="abtn pdf" id="btnPDF">📄 PDF</button>
+      <button class="abtn wa" id="btnWA">💬 WhatsApp</button>
+      <button class="abtn csv" id="btnCSV">📊 Excel</button>
+    </div>
+
+    <div id="expList"></div>
+    <div class="sumline red"><span>Total Expenses</span><b id="expSum">₹0</b></div>
+  </section>
+
+  <!-- ===== BALANCE PANEL ===== -->
+  <section class="panel" id="panel-balance">
+    <div class="bal-box">
+      <div class="bal-lbl">Remaining Balance</div>
+      <div class="bal-val" id="balBig">₹0</div>
+      <div class="tap-hint" id="tapHint" style="font-size:11px;color:var(--muted);margin-bottom:16px;cursor:pointer;">
+        Tap to see breakdown ▾
+      </div>
+      
+      <div class="bal-rows">
+        <div class="bal-row"><span>Total Revenue (with carry)</span><b class="g" id="bRev">₹0</b></div>
+        <div class="bal-row"><span>Total Expenses</span><b class="r" id="bExp">₹0</b></div>
+        <div class="bal-row"><span>= Remaining</span><b id="bRes">₹0</b></div>
+      </div>
+    </div>
+
+    <div class="settle-up-box">
+      <h3>⚖️ Settle Up (Kisne Kitna Diya)</h3>
+      <div id="settleUpList"></div>
+    </div>
+
+    <div class="stat-box" style="margin-top:14px; flex-direction:row; justify-content:space-between; padding:14px;">
+      <span style="font-size:13px; color:var(--muted); font-weight:700; text-transform:none;">Pichle mahine se:</span>
+      <b id="compareExp" style="font-size:15px; color:var(--muted);">₹0</b>
+    </div>
+
+    <div class="chart-wrap" id="chartWrap">
+      <div class="chart-card">
+        <h3>📊 Expense Breakdown</h3>
+        <div class="donut-box" id="donutBox"></div>
+        <div class="legend" id="chartLegend"></div>
+      </div>
+    </div>
+
+    <div class="backup-box">
+      <h3>💾 Data Backup</h3>
+      <p>Data safe rakhne ke liye backup file download karein.</p>
+      <div class="backup-btns">
+        <div class="b-btn" id="btnExport">⬇ Export</div>
+        <div class="b-btn" id="btnImport">⬆ Import</div>
+      </div>
+      <input type="file" id="fileInput" accept=".json" style="display:none">
+    </div>
+  </section>
+
+</div>
+
+<!-- Hidden Print Section -->
+<div id="print-section">
+  <div class="p-head">
+    <h2>Flat Khata - Expenses</h2>
+    <p id="pMonth"></p>
+  </div>
+  <table class="p-table">
+    <thead><tr><th>Date</th><th>Item</th><th>Amount</th></tr></thead>
+    <tbody id="pBody"></tbody>
+  </table>
+  <div class="p-total" id="pTotal"></div>
+</div>
+
+<script>
+/* ================= HELPERS ================= */
+const LS = 'flatkhata_v13';
+const uid = () => Math.random().toString(36).slice(2, 9);
+const ym = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+const today = () => new Date().toISOString().slice(0, 10);
+const fmt = n => '₹' + Number(n || 0).toLocaleString('en-IN');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const $ = id => document.getElementById(id);
+
+/* ================= STATE ================= */
+let state = (() => {
+  try {
+    const raw = localStorage.getItem(LS) || localStorage.getItem('flatkhata_v12');
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && s.months) { if (!s.month) s.month = ym(new Date()); s.theme = s.theme || 'light'; return s; }
+    }
+  } catch (e) {}
+  return { month: ym(new Date()), theme: 'light', months: {} };
+})();
+
+const save = () => localStorage.setItem(LS, JSON.stringify(state));
+
+function getMonth(m) {
+  if (!state.months[m]) {
+    let names = null;
+    const keys = Object.keys(state.months).sort();
+    for (let i = keys.length - 1; i >= 0; i--) {
+      const rv = state.months[keys[i]].revenue;
+      if (rv && rv.length) { names = rv.map(x => x.name); break; }
+    }
+    if (!names) names = ['Flatmate 1','Flatmate 2','Flatmate 3','Flatmate 4','Flatmate 5','Flatmate 6'];
+    state.months[m] = {
+      revenue: names.map(n => ({ id: uid(), name: n, amount: 0 })),
+      expenses: []
+    };
+  }
+  return state.months[m];
+}
+
+/* ================= CARRY FORWARD LOGIC ================= */
+function calculateCarryForward(targetMonthStr) {
+  const allMonths = Object.keys(state.months).sort();
+  let balance = 0;
+
+  for (const m of allMonths) {
+    if (m >= targetMonthStr) break; 
+
+    const rev = state.months[m].revenue.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const exp = state.months[m].expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+
+    balance = balance + rev - exp;
+  }
+  return balance;
+}
+
+/* ================= THEME ================= */
+function applyTheme() {
+  document.body.classList.toggle('dark', state.theme === 'dark');
+  $('themeBtn').textContent = state.theme === 'dark' ? '☀️' : '🌙';
+}
+$('themeBtn').addEventListener('click', () => {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  save(); applyTheme();
+});
+
+/* ================= RENDER ================= */
+let currentSearch = '';
+
+function renderRevenue() {
+  const md = getMonth(state.month);
+  $('revList').innerHTML = md.revenue.map(r => `
+    <div class="rev-row">
+      <input class="in-name" data-id="${r.id}" type="text" value="${esc(r.name)}" placeholder="Name">
+      <input class="in-amt" data-id="${r.id}" type="number" inputmode="decimal" min="0" step="1"
+             value="${r.amount ? r.amount : ''}" placeholder="0">
+    </div>
+  `).join('');
+}
+
+function renderExpenses() {
+  const md = getMonth(state.month);
+  let list = md.expenses.slice().sort((a, b) => b.date.localeCompare(a.date));
+  
+  if (currentSearch) {
+    const q = currentSearch.toLowerCase();
+    list = list.filter(e => e.item.toLowerCase().includes(q) || e.date.includes(q));
+  }
+
+  const el = $('expList');
+  if (!list.length) { 
+    el.innerHTML = `<p class="empty">${currentSearch ? 'Kuch nahi mila' : 'Abhi koi kharcha nahi likha'}</p>`; 
+    return; 
+  }
+  el.innerHTML = list.map(e => `
+    <div class="exp-item">
+      <div class="info">
+        <div class="it">${esc(e.item)}</div>
+        <div class="id">${e.date}</div>
+      </div>
+      <div class="amt">${fmt(e.amount)}</div>
+      <button class="del" data-id="${e.id}" aria-label="delete">✕</button>
+    </div>
+  `).join('');
+}
+
+function renderSettleUp(exp, members) {
+  const el = $('settleUpList');
+  if (!members.length) { el.innerHTML = '<p class="empty">Koi member nahi hai</p>'; return; }
+  if (exp === 0) { el.innerHTML = '<p class="empty">Abhi tak koi kharcha nahi hua</p>'; return; }
+
+  const sharePerPerson = exp / members.length;
+  let html = '';
+
+  members.forEach(m => {
+    const paid = Number(m.amount) || 0;
+    const net = paid - sharePerPerson;
+
+    if (net > 0) {
+      html += `<div class="settle-row"><span>${esc(m.name)}</span><b class="pos">+${fmt(net)} (wapas milega)</b></div>`;
+    } else if (net < 0) {
+      html += `<div class="settle-row"><span>${esc(m.name)}</span><b class="neg">-${fmt(Math.abs(net))} (aur dena hai)</b></div>`;
+    } else {
+      html += `<div class="settle-row"><span>${esc(m.name)}</span><b class="neutral">Settled (₹0)</b></div>`;
+    }
+  });
+
+  el.innerHTML = html;
+}
+
+/* ================= CALCULATIONS & TOTALS ================= */
+function updateTotals() {
+  const md = getMonth(state.month);
+  const flatmateRev = md.revenue.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+  const exp = md.expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+
+  const prevBal = calculateCarryForward(state.month);
+
+  const cfEl = $('carryForwardVal');
+  cfEl.textContent = fmt(prevBal);
+  cfEl.style.color = prevBal < 0 ? 'var(--red)' : 'var(--green)';
+
+  const totalRev = flatmateRev + prevBal;
+  const bal = totalRev - exp;
+
+  $('revTotal').textContent = fmt(totalRev);
+  $('expTotal').textContent = fmt(exp);
+  $('balTotal').textContent = fmt(bal);
+  $('balTotal').style.color = bal < 0 ? 'var(--red)' : 'var(--indigo)';
+
+  $('revSum').textContent = fmt(totalRev);
+  $('expSum').textContent = fmt(exp);
+
+  $('balBig').textContent = fmt(bal);
+  $('balBig').classList.toggle('neg', bal < 0);
+  $('bRev').textContent = fmt(totalRev);
+  $('bExp').textContent = fmt(exp);
+  $('bRes').textContent = fmt(bal);
+
+  renderSettleUp(exp, md.revenue);
+
+  // ---- AVERAGE CALCULATIONS (As per user's exact formula) ----
+  const [selY, selM] = state.month.split('-').map(Number);
+  const daysInMonth = new Date(selY, selM, 0).getDate(); 
+  const now = new Date();
+  const currentYM = ym(now);
+  
+  let daysPassed = daysInMonth; 
+  if (state.month === currentYM) {
+    daysPassed = now.getDate();
+  } else if (state.month > currentYM) {
+    daysPassed = 1;
+  }
+  
+  const daysRemaining = Math.max(1, daysInMonth - daysPassed);
+
+  // 1. Total Avg = Total Rev / Total Days
+  const avgExpensesExpected = totalRev / daysInMonth;
+  $('topAvgExp').textContent = fmt(Math.round(avgExpensesExpected));
+
+  // 2. Current Avg = Expenses / Days Passed
+  const currentAverageExp = exp / daysPassed;
+  $('topCurrAvg').textContent = fmt(Math.round(currentAverageExp));
+
+  // 3. Surplus / Deficit = Total Avg - Current Avg
+  const surplusDiff = avgExpensesExpected - currentAverageExp;
+  const surplusEl = $('topSurplusAvg');
+  if (surplusDiff < 0) {
+    surplusEl.textContent = `-${fmt(Math.round(Math.abs(surplusDiff)))}`;
+    surplusEl.className = 'stv red';
+  } else {
+    surplusEl.textContent = `+${fmt(Math.round(surplusDiff))}`;
+    surplusEl.className = 'stv green';
+  }
+
+  // 4. Remaining Avg = Remaining Balance / Remaining Days
+  const remainingBal = totalRev - exp;
+  const dailyBudget = remainingBal / daysRemaining;
+  const budgetEl = $('topRemainingAvg');
+  
+  if (dailyBudget < 0) {
+    budgetEl.textContent = `-${fmt(Math.round(Math.abs(dailyBudget)))}`;
+    budgetEl.className = 'stv red';
+  } else {
+    budgetEl.textContent = `+${fmt(Math.round(dailyBudget))}`;
+    budgetEl.className = 'stv indigo';
+  }
+
+  // ---- COMPARISON ----
+  let prevY = selY, prevM = selM - 1;
+  if (prevM === 0) { prevM = 12; prevY--; }
+  const prevYM = `${prevY}-${String(prevM).padStart(2, '0')}`;
+
+  let prevExpTotal = 0;
+  if (state.months[prevYM] && state.months[prevYM].expenses) {
+    prevExpTotal = state.months[prevYM].expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  }
+  
+  const compEl = $('compareExp');
+  if (prevExpTotal === 0) {
+    compEl.textContent = "Koi data nahi";
+    compEl.style.color = 'var(--muted)';
+  } else {
+    const diffComp = exp - prevExpTotal;
+    if (diffComp > 0) {
+      compEl.textContent = `+${fmt(diffComp)} zyada`;
+      compEl.style.color = 'var(--red)';
+    } else if (diffComp < 0) {
+      compEl.textContent = `${fmt(Math.abs(diffComp))} kam`;
+      compEl.style.color = 'var(--green)';
+    } else {
+      compEl.textContent = "Barabar hai";
+      compEl.style.color = 'var(--muted)';
+    }
+  }
+
+  if (chartVisible) buildChart();
+}
+
+function renderAll() {
+  $('monthPicker').value = state.month;
+  applyTheme();
+  renderRevenue();
+  renderExpenses();
+  updateTotals();
+}
+
+/* ================= CHART ================= */
+let chartVisible = false;
+const COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899','#06b6d4'];
+
+function toggleChart() {
+  chartVisible = !chartVisible;
+  const wrap = $('chartWrap'), hint = $('tapHint');
+  if (chartVisible) {
+    buildChart();
+    wrap.classList.add('show');
+    hint.textContent = 'Tap to hide breakdown ▴';
+  } else {
+    wrap.classList.remove('show');
+    hint.textContent = 'Tap to see breakdown ▾';
+  }
+}
+
+function buildChart() {
+  const md = getMonth(state.month), box = $('donutBox'), lg = $('chartLegend');
+  if (!md.expenses.length) {
+    box.innerHTML = '<div class="empty" style="padding:60px 0">Koi kharcha nahi</div>';
+    lg.innerHTML = ''; return;
+  }
+
+  const groups = {};
+  md.expenses.forEach(e => {
+    const key = (e.item || 'other').trim().toLowerCase();
+    if (!groups[key]) groups[key] = { label: (e.item || 'Other').trim(), value: 0 };
+    groups[key].value += Number(e.amount) || 0;
+  });
+
+  const sorted = Object.values(groups).sort((a, b) => b.value - a.value);
+  const total = sorted.reduce((s, g) => s + g.value, 0);
+  const cx = 100, cy = 100, r = 72, sw = 28, circ = 2 * Math.PI * r;
+  let offset = 0, paths = '';
+
+  sorted.forEach((g, i) => {
+    const dash = (g.value / total) * circ;
+    g.color = COLORS[i % COLORS.length];
+    paths += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${g.color}" stroke-width="${sw}" stroke-dasharray="${dash} ${circ - dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})" />`;
+    offset += dash;
+  });
+
+  paths += `<text x="${cx}" y="94" text-anchor="middle" fill="var(--muted)" font-size="9" font-weight="800" font-family="Arial">TOTAL</text>`;
+  paths += `<text x="${cx}" y="116" text-anchor="middle" fill="var(--text)" font-size="16" font-weight="800" font-family="Arial">${fmt(total)}</text>`;
+
+  box.innerHTML = `<svg viewBox="0 0 200 200" class="donut-svg">${paths}</svg>`;
+  lg.innerHTML = sorted.map(g => `
+    <div class="lg-row">
+      <span class="lg-dot" style="background:${g.color}"></span>
+      <span class="lg-name">${esc(g.label)}</span>
+      <span class="lg-pct">${((g.value / total) * 100).toFixed(1)}%</span>
+      <span class="lg-amt">${fmt(g.value)}</span>
+    </div>
+  `).join('');
+}
+
+/* ================= EVENTS ================= */
+$('monthPicker').addEventListener('change', e => {
+  if (e.target.value) { state.month = e.target.value; currentSearch=''; $('searchExp').value=''; save(); renderAll(); }
+});
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    $('panel-' + t.dataset.tab).classList.add('active');
+  });
+});
+
+$('revList').addEventListener('input', e => {
+  const el = e.target, id = el.dataset.id;
+  if (!id) return;
+  const row = getMonth(state.month).revenue.find(r => r.id === id);
+  if (!row) return;
+  if (el.classList.contains('in-name')) row.name = el.value;
+  else row.amount = Number(el.value) || 0;
+  save(); updateTotals();
+});
+
+$('expForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target, date = f.date.value || today(), item = f.item.value.trim(), amount = Number(f.amount.value);
+  if (!item || amount <= 0) return alert('Sahi item aur amount daalo');
+  getMonth(state.month).expenses.push({ id: uid(), date, item, amount });
+  save();
+  f.reset(); f.date.value = today();
+  renderExpenses(); updateTotals(); f.item.focus();
+});
+
+$('expList').addEventListener('click', e => {
+  const b = e.target.closest('.del');
+  if (!b) return;
+  const md = getMonth(state.month);
+  md.expenses = md.expenses.filter(x => x.id !== b.dataset.id);
+  save(); renderExpenses(); updateTotals();
+});
+
+$('searchExp').addEventListener('input', e => {
+  currentSearch = e.target.value;
+  renderExpenses();
+});
+
+$('balBig').addEventListener('click', toggleChart);
+$('tapHint').addEventListener('click', toggleChart);
+
+/* ================= BACKUP & RESTORE ================= */
+$('btnExport').addEventListener('click', () => {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+  const dlAnchorElem = document.createElement('a');
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", `flat-khata-backup-${today()}.json`);
+  dlAnchorElem.click();
+});
+
+$('btnImport').addEventListener('click', () => $('fileInput').click());
+
+$('fileInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importedState = JSON.parse(e.target.result);
+      if (importedState.months) {
+        if(confirm('Data restore karein? Isse aapka current data replace ho jayega.')) {
+          state = importedState;
+          save(); renderAll();
+          alert('Data successfully restore ho gaya!');
+        }
+      } else {
+        alert('Galat file format!');
+      }
+    } catch (err) {
+      alert('File read karne me error aayi.');
+    }
+    $('fileInput').value = '';
+  };
+  reader.readAsText(file);
+});
+
+/* ================= PDF, WHATSAPP & CSV ================= */
+$('btnPDF').addEventListener('click', () => {
+  const md = getMonth(state.month);
+  if (!md.expenses.length) return alert('Koi kharcha nahi hai.');
+  $('pMonth').textContent = 'Month: ' + state.month;
+  const sorted = md.expenses.slice().sort((a,b) => a.date.localeCompare(b.date));
+  let tbody = '', total = 0;
+  sorted.forEach(e => {
+    tbody += `<tr><td>${e.date}</td><td>${esc(e.item)}</td><td>${fmt(e.amount)}</td></tr>`;
+    total += Number(e.amount);
+  });
+  $('pBody').innerHTML = tbody;
+  $('pTotal').textContent = 'Total Expenses: ' + fmt(total);
+  window.print();
+});
+
+$('btnWA').addEventListener('click', () => {
+  const md = getMonth(state.month);
+  if (!md.expenses.length) return alert('Koi kharcha nahi hai.');
+  let text = `*🏠 Flat Khata - Expenses*\n📅 *Month:* ${state.month}\n\n`, total = 0;
+  const sorted = md.expenses.slice().sort((a,b) => b.date.localeCompare(a.date));
+  sorted.forEach((e, i) => {
+    text += `${i + 1}. ${e.date} | *${esc(e.item)}* - ${fmt(e.amount)}\n`;
+    total += Number(e.amount);
+  });
+  text += `\n💰 *Total Kharcha: ${fmt(total)}*`;
+  if (navigator.share) navigator.share({ title: 'Flat Khata', text: text }).catch(console.log);
+  else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+});
+
+$('btnCSV').addEventListener('click', () => {
+  const md = getMonth(state.month);
+  if (!md.revenue.length && !md.expenses.length) return alert('Data nahi hai export karne ke liye.');
+
+  let csvContent = "Type,Date/Member,Description,Amount\n";
+  md.revenue.forEach(r => {
+    if (r.amount > 0) csvContent += `Revenue,-,"${esc(r.name)}",${r.amount}\n`;
+  });
+  md.expenses.forEach(e => {
+    csvContent += `Expense,${e.date},"${esc(e.item)}",${e.amount}\n`;
+  });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `flat-khata-${state.month}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+
+/* ================= INIT ================= */
+$('expForm').date.value = today();
+renderAll();
+</script>
+</body>
+</html>
